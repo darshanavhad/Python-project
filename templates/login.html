@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - ExpensePro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #4f46e5; --bg-color: #f8fafc; --card-bg: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border-color: #e2e8f0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .auth-card { background: var(--card-bg); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid var(--border-color); width: 100%; max-width: 400px; text-align: center; }
+        .brand { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; }
+        h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; }
+        form { display: flex; flex-direction: column; gap: 15px; text-align: left; }
+        label { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
+        input { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; background: #f8fafc; font-family: 'Inter', sans-serif; transition: border-color 0.2s, background 0.2s; }
+        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        button { padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+        button:hover { background: #4338ca; transform: translateY(-1px); }
+        .footer-link { margin-top: 20px; font-size: 0.9rem; color: var(--text-muted); }
+        .footer-link a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .footer-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/></svg>
+            ExpensePro
+        </div>
+        <h2>Welcome back</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span style="color:red; font-size:0.8rem;">{{ field.errors }}</span>{% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit">Log in to dashboard</button>
+        </form>
+        <div class="footer-link">
+            Don't have an account? <a href="{% url 'signup' %}">Sign up for free</a>
+        </div>
+    </div>
+</body>
+</html>

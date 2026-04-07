@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Analytics</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 50px;
+        }
+
+        /* NAVBAR (Same as Index) */
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar .brand {
+            font-size: 1.25rem; font-weight: 700; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; font-family: 'Outfit', sans-serif;
+        }
+        .navbar .links { display: flex; gap: 20px; }
+        .navbar a.nav-link {
+            text-decoration: none; color: var(--text-muted); font-weight: 500; transition: all 0.2s; padding: 8px 12px; border-radius: 6px;
+        }
+        .navbar a.nav-link.active, .navbar a.nav-link:hover {
+            color: var(--primary); background-color: #e0e7ff;
+        }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        h2 { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 30px; color: var(--text-main); letter-spacing: -0.02em; }
+        
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-dashboard { grid-template-columns: 1fr; }
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+        .card h3 { font-size: 1.1rem; color: var(--text-muted); font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* DATA LIST */
+        .stat-list { list-style: none; }
+        .stat-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .stat-list li:last-child { border-bottom: none; }
+        .stat-list li span.val { color: var(--primary); font-weight: 700; font-family: 'Outfit', sans-serif; font-size: 1.1rem;}
+
+        /* ML PREDICTION BOX */
+        .ml-card {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            border: none;
+            overflow: hidden;
+            position: relative;
+        }
+        .ml-card::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: spin 15s linear infinite;
+        }
+        .ml-card h3 { color: rgba(255,255,255,0.9); position: relative; z-index: 2; }
+        .prediction-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-top: 10px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* CHARTS SCROLL/GRID */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .chart-img-wrapper {
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .chart-img-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            mix-blend-mode: multiply; /* Helps blend matplotlib white backgrounds */
+        }
+        
+        .error-msg {
+            background-color: #fee2e2; color: #dc2626; padding: 20px; border-radius: 10px; border: 1px solid #fecaca; text-align: center; font-weight: 500;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{% url 'index' %}" class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/></svg>
+            ExpensePro
+        </a>
+        <div class="links">
+            <a href="{% url 'index' %}" class="nav-link">Dashboard</a>
+            <a href="{% url 'analysis' %}" class="nav-link active">Analytics & ML</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="nav-link">Profile</a>
+                <a href="{% url 'logout' %}" style="display:inline-block;"><button style="padding: 6px 12px; height:auto; margin-left:10px; background-color:var(--primary); border:none; border-radius:8px; color:white; font-family:'Inter', sans-serif; font-weight:600; cursor:pointer;">Logout {{ user.username }}</button></a>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-link">Login</a>
+                <a href="{% url 'signup' %}" class="nav-link" style="font-weight:700; color:var(--primary);">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Intelligence Dashboard</h2>
+
+        {% if error %}
+            <div class="error-msg" style="animation: fadeUp 0.5s ease-out;">
+                <svg width="24" height="24" style="margin-bottom: 10px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p>{{ error }}</p>
+            </div>
+        {% else %}
+            
+            <div class="grid-dashboard">
+                <!-- Left Column: Insights & ML -->
+                <div style="display: flex; flex-direction: column; gap: 30px;">
+                    
+                    <div class="card ml-card" style="animation: fadeUp 0.5s ease-out;">
+                        <h3>Sckit-Learn Prediction</h3>
+                        <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Estimated spending for next month based on historical linear models:</p>
+                        <div class="prediction-val">{{ prediction }}</div>
+                    </div>
+
+                    <div class="card" style="animation: fadeUp 0.6s ease-out; animation-fill-mode: both;">
+                        <h3>Average Spending</h3>
+                        <ul class="stat-list">
+                            {% for cat, avg in avg_per_category.items %}
+                                <li>
+                                    <span>{{ cat }}</span>
+                                    <span class="val">${{ avg|floatformat:2 }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Visualizations -->
+                <div class="card" style="animation: fadeUp 0.7s ease-out; animation-fill-mode: both;">
+                    <h3>Data Visualization Trends</h3>
+                    <div class="charts-container">
+                        <div class="chart-img-wrapper">
+                            <img src="data:image/png;base64,{{ chart_bar }}" alt="Bar Chart">
+                        </div>
+                        <div class="chart-img-wrapper">
+                            <img src="data:image/png;base64,{{ chart_line }}" alt="Line Chart">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+    </div>
+
+</body>
+</html>
